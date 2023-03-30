@@ -6,10 +6,9 @@ import networkx as nx
 import numpy as np
 
 
-
 # ------- FUNKCJE POMOCNICZE -------
 # Źródło: https://networkx.org/documentation/stable/auto_examples/drawing/plot_multipartite_graph.html
-def multilayered_graph(*subset_sizes):
+def __multilayered_graph(*subset_sizes):
     extents = nx.utils.pairwise(itertools.accumulate((0,) + subset_sizes))
     layers = [range(start, end) for start, end in extents]
     G = nx.Graph()
@@ -21,18 +20,17 @@ def multilayered_graph(*subset_sizes):
 
 
 def narysuj_bom(bom):
-    print(bom.poziomy)
-    plt.figure(figsize=(10, 6))
+    graf = plt.figure(figsize=(10, 6))
     plt.rcParams["figure.figsize"] = [7.50, 3.50]
     plt.rcParams["figure.autolayout"] = True
 
-    stworzone_poziomy = multilayered_graph(*bom.poziomy)
+    stworzone_poziomy = __multilayered_graph(*bom.poziomy)
     odwrocony_diagram = nx.from_numpy_matrix(bom.macierz, create_using=nx.DiGraph)
     diagram = nx.DiGraph.reverse(odwrocony_diagram)
     pozycja = nx.multipartite_layout(stworzone_poziomy, subset_key="layer")
 
     nx.draw(diagram, pozycja, node_size=650, node_color='#E6E6FA', with_labels=True)
-    plt.show()
+    return graf
 
 
 # ------------------------------------
@@ -57,6 +55,9 @@ def wygeneruj_bom(liczba_wyrobow, maksymalna_ilosc_wyrobow_w_warstwie,
                 nowe_produkty = random.randint(minimalna_ilosc_wyrobow_w_warstwie, maksymalna_ilosc_wyrobow_w_warstwie)
                 if nowe_produkty + produkty <= liczba_wyrobow:
                     break
+                if liczba_wyrobow - produkty < minimalna_ilosc_wyrobow_w_warstwie:
+                    return wygeneruj_bom(liczba_wyrobow, maksymalna_ilosc_wyrobow_w_warstwie,
+                                         minimalna_ilosc_wyrobow_w_warstwie, prawdopodobienstwo_stworzenia_polaczenia)
 
             for produkt_poprzednia_warstwa in range(produkty):
                 for produkt_nowa_warstwa in range(nowe_produkty):
@@ -66,11 +67,12 @@ def wygeneruj_bom(liczba_wyrobow, maksymalna_ilosc_wyrobow_w_warstwie,
             poziomy.append(nowe_produkty)
             produkty += nowe_produkty
 
-        if not czy_produkt_bez_polaczen(bom):
+        if not __czy_produkt_bez_polaczen(bom):
             break
         iteracja += 1
-        przerwij_generowanie_jezeli_ilosc_iteracji_przekroczona(iteracja)
+        __przerwij_generowanie_jezeli_ilosc_iteracji_przekroczona(iteracja)
     return Bom(bom, poziomy)
+
 
 # Należy odpowiednio dobrać prawdopodobieństwo do liczby polaczen wychodzacych
 def wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej(liczba_wyrobow, maksymalna_ilosc_wyrobow_w_warstwie,
@@ -90,6 +92,9 @@ def wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej(liczba_wyrobow, maksym
                 nowe_produkty = random.randint(minimalna_ilosc_wyrobow_w_warstwie, maksymalna_ilosc_wyrobow_w_warstwie)
                 if nowe_produkty + produkty <= liczba_wyrobow:
                     break
+                if liczba_wyrobow - produkty < minimalna_ilosc_wyrobow_w_warstwie:
+                    return wygeneruj_bom(liczba_wyrobow, maksymalna_ilosc_wyrobow_w_warstwie,
+                                         minimalna_ilosc_wyrobow_w_warstwie, prawdopodobienstwo_stworzenia_polaczenia)
 
             for produkt_poprzednia_warstwa in range(produkty):
                 for produkt_nowa_warstwa in range(nowe_produkty):
@@ -105,31 +110,31 @@ def wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej(liczba_wyrobow, maksym
             poziomy.append(nowe_produkty)
             produkty += nowe_produkty
 
-        if not czy_produkt_bez_polaczen(bom):
+        if not __czy_produkt_bez_polaczen(bom):
             break
         iteracja += 1
-        przerwij_generowanie_jezeli_ilosc_iteracji_przekroczona(iteracja)
+        __przerwij_generowanie_jezeli_ilosc_iteracji_przekroczona(iteracja)
     return Bom(bom, poziomy)
 
 
-def czy_produkt_bez_polaczen(bom_macierz):
-    kolumny_suma = suma_kolumny(bom_macierz)
-    wiersze_suma = suma_wiersze(bom_macierz)
+def __czy_produkt_bez_polaczen(bom_macierz):
+    kolumny_suma = __suma_kolumny(bom_macierz)
+    wiersze_suma = __suma_wiersze(bom_macierz)
     for produkt in range(len(bom_macierz)):
         if kolumny_suma[produkt] == 0 and wiersze_suma[produkt] == 0:
             return True
     return False
 
 
-def suma_kolumny(bom_macierz):
+def __suma_kolumny(bom_macierz):
     return np.sum(bom_macierz, axis=0)
 
 
-def suma_wiersze(bom_macierz):
+def __suma_wiersze(bom_macierz):
     return np.sum(bom_macierz, axis=1)
 
-def przerwij_generowanie_jezeli_ilosc_iteracji_przekroczona(obecna_iteracja):
+
+def __przerwij_generowanie_jezeli_ilosc_iteracji_przekroczona(obecna_iteracja):
     maksymalna_ilosc_prob = 10000
     if obecna_iteracja > maksymalna_ilosc_prob:
         raise Exception("Błąd generowania bom'u. Przekroczono ilość prób. Należy zweryfikować argumenty wejściowe.")
-

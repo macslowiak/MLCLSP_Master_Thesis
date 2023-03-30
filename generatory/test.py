@@ -1,7 +1,6 @@
 import numpy as np
 
 import data_generator as dg
-import mlclsp_model_generator as mlclspgen
 
 
 def przyklad_z_artykulu():
@@ -40,11 +39,23 @@ def przyklad_z_artykulu():
                             czas_przezbrojenia, koszt_przezbrojenia, dostepnosc_maszyn)
 
 
-mlclsp_wejscie = przyklad_z_artykulu()
-mlclsp = mlclspgen.mlclsp_model(mlclsp_wejscie)
-mlclsp.update()
-mlclsp.optimize()
-
-# Wynik dla mlclsp - 12, mlclsp_partie - 10, mlclsp_strumień - 7. 12 dla mlclsp, ponieważ
-# zmapowane zostały realne przezbrojenia tj. tylko te, które są możliwe dla wyrobów
+# mlclsp_wejscie = przyklad_z_artykulu()
+#
+# # mlclsp
+# mlclsp = mlclspgen.mlclsp_model(mlclsp_wejscie)
+# mlclsp.update()
+# mlclsp.optimize()
+#
+# # mlclsp partie
+# mlclsp = mlclspgen.mlclsp_partie_model(mlclsp_wejscie)
+# mlclsp.update()
+# mlclsp.optimize()
+#
+# # mlclsp partie
+# mlclsp = mlclspgen.mlclsp_strumien_model(mlclsp_wejscie)
+# mlclsp.update()
+# mlclsp.optimize()
+#
+# # Wynik dla mlclsp - 12, mlclsp_partie - 10, mlclsp_strumień - 7. 12 dla mlclsp, ponieważ
+# # zmapowane zostały realne przezbrojenia tj. tylko te, które są możliwe dla wyrobów
 

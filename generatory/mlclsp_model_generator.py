@@ -28,6 +28,10 @@ def mlclsp_model(wejscie_mlclsp_model):
         for i in wejscie_mlclsp_model.zbior_maszyn_z_przypisanymi_wyrobami[m]:
             s[i, m] = np.max(sij[i])
 
+    # -------- SPRAWDZENIE POPRAWNOŚCI DLA p,s -------- #
+    __sprawdz_poprawnosc_dla_podstawowego_mlclsp(p)
+    __sprawdz_poprawnosc_dla_podstawowego_mlclsp(s)
+
     # -------- ZMIENNE DECYZYJNE -------- #
     model = gb.Model('MLCLSP')
 
@@ -100,6 +104,10 @@ def mlclsp_partie_model(wejscie_mlclsp_model):
 
     p = wejscie_mlclsp_model.czas_produkcji
     p = np.apply_along_axis(lambda e: e[(e != 0).argmax()], 1, p)
+
+    # -------- SPRAWDZENIE POPRAWNOŚCI DLA p,s -------- #
+    __sprawdz_poprawnosc_dla_pozostalych_mlclsp(s, zbior_maszyn_z_przypisanymi_wyrobami)
+    __sprawdz_poprawnosc_dla_pozostalych_mlclsp(c, zbior_maszyn_z_przypisanymi_wyrobami)
 
     # -------- ZMIENNE DECYZYJNE -------- #
     model = gb.Model('MLCLSP_PARTIE')
@@ -283,6 +291,10 @@ def mlclsp_strumien_model(wejscie_mlclsp_model):
 
     p = wejscie_mlclsp_model.czas_produkcji
     p = np.apply_along_axis(lambda e: e[(e != 0).argmax()], 1, p)
+
+    # -------- SPRAWDZENIE POPRAWNOŚCI DLA p,s -------- #
+    __sprawdz_poprawnosc_dla_pozostalych_mlclsp(s, zbior_maszyn_z_przypisanymi_wyrobami)
+    __sprawdz_poprawnosc_dla_pozostalych_mlclsp(c, zbior_maszyn_z_przypisanymi_wyrobami)
 
     # -------- ZMIENNE DECYZYJNE -------- #
     model = gb.Model('MLCLSP_STRUMIEN')
@@ -487,8 +499,27 @@ def mlclsp_strumien_model(wejscie_mlclsp_model):
     return model
 
 
-def sprawdz_poprawnosc_dla(tabela, nazwa_arkusza):
+def __sprawdz_poprawnosc_dla_podstawowego_mlclsp(tabela):
     for kolumna in tabela:
         if np.count_nonzero(kolumna) != 1:
             raise Exception(
-                'Każdy wyrób może być produkowany tylko na jednej maszynie. Należy poprawić dane w arkuszu ' + nazwa_arkusza)
+                'Każdy wyrób może być produkowany tylko na jednej maszynie. Dane zostały źle wygenerowane')
+
+
+def __sprawdz_poprawnosc_dla_pozostalych_mlclsp(tabela, zbior_maszyn_z_przypisanymi_wyrobami):
+    for kolumna in range(len(tabela[0])):
+        for wiersz in range(len(tabela)):
+            if tabela[wiersz, kolumna] != 0:
+                if wiersz == kolumna:
+                    raise Exception(
+                        'Wartości [i,i] muszą być równe 0. Dane zostały źle wygenerowane dla: ' +
+                        '(' + str(wiersz) + ',' + str(kolumna) + ')')
+                else:
+                    is_valid = False
+                    for maszyna in zbior_maszyn_z_przypisanymi_wyrobami:
+                        if wiersz in maszyna and kolumna in maszyna:
+                            is_valid = True
+                    if not is_valid:
+                        raise Exception(
+                            'Istnieją dane dla przezbrojeń, które są niemożliwe do wykonania. Dane zostały źle wygenerowane dla: ' +
+                            '(' + str(wiersz) + ',' + str(kolumna) + ')')

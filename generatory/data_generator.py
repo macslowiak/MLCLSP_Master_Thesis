@@ -1,4 +1,5 @@
 import random
+from pathlib import Path
 
 import numpy
 
@@ -21,10 +22,25 @@ class WejscieMlclsp:
         self.dostepnosc_maszyn = dostepnosc_maszyn
         self.zbior_maszyn_z_przypisanymi_wyrobami = zbior_maszyn_z_przypisanymi_wyrobami
 
+    def __str__(self):
+        return (f'zbior_wyrobow:\n{self.zbior_wyrobow}\n'
+                f'zbior_okresow:\n{self.zbior_okresow}\n'
+                f'zbior_maszyn:\n{self.zbior_maszyn}\n'
+                f'jkuz:\n{self.jkuz}\n'
+                f'zapas_pocz:\n{self.zapas_pocz}\n'
+                f'czas_realizacji:\n{self.czas_realizacji}\n'
+                f'zapotrzebowanie:\n{self.zapotrzebowanie}\n'
+                f'bom:\n{self.bom}\n'
+                f'czas_produkcji:\n{self.czas_produkcji}\n'
+                f'czas_przezbrojenia:\n{self.czas_przezbrojenia}\n'
+                f'koszt_przezbrojenia:\n{self.koszt_przezbrojenia}\n'
+                f'dostepnosc_maszyn:\n{self.dostepnosc_maszyn}\n'
+                f'zbior_maszyn_z_przypisanymi_wyrobami:\n{self.zbior_maszyn_z_przypisanymi_wyrobami}')
 
-def wygeneruj_dane(liczba_wyrobow, liczba_okresow, liczba_maszyn):
-    # if liczba_wyrobow not in [5, 10, 15, 20, 25, 30]:
-    #     raise Exception("Liczba wyrobów musi być równa jedenej z podanych liczb: [5,10,15,20,25,30]")
+
+def wygeneruj_dane(liczba_wyrobow, liczba_okresow, liczba_maszyn, bom):
+    if liczba_wyrobow not in [5, 10, 15, 20, 25, 30]:
+        raise Exception("Liczba wyrobów musi być równa jedenej z podanych liczb: [5,10,15,20,25,30]")
     zbior_wyrobow = numpy.array(list(range(0, liczba_wyrobow)))
     zbior_okresow = numpy.array(list(range(1, liczba_okresow + 1)))
     zbior_maszyn = numpy.array(list(range(0, liczba_maszyn)))
@@ -34,7 +50,7 @@ def wygeneruj_dane(liczba_wyrobow, liczba_okresow, liczba_maszyn):
     czas_realizacji = numpy.array([0] * liczba_wyrobow)
 
     zapotrzebowanie = wygeneruj_zapotrzebowanie(liczba_wyrobow, liczba_okresow)
-    bom = wygeneruj_bom_dla_sekwencji_jeden_z_dwoch(liczba_wyrobow)
+    bom = bom.macierz
 
     zbior_maszyn_z_przypisanymi_wyrobami = przypisz_wyroby_do_maszyn(liczba_wyrobow, liczba_maszyn)
 
@@ -47,45 +63,9 @@ def wygeneruj_dane(liczba_wyrobow, liczba_okresow, liczba_maszyn):
 
     dostepnosc_maszyn = wygeneruj_dostepnosc_maszyn(liczba_wyrobow, liczba_okresow)
 
-    print('zbior_wyrobow(i): \n', zbior_wyrobow)
-    print('zbior_okresow(t): \n', zbior_okresow)
-    print('zbior_maszyn(m): \n', zbior_maszyn)
-    print('jkuz(i): \n', jkuz)
-    print('zapas_pocz(t): \n', zapas_pocz)
-    print('czas_realizacji(i): \n', czas_realizacji)
-    print('zapotrzebowanie(t): \n', zapotrzebowanie)
-    print('bom(i,j): \n', bom)
-    print('czas_produkcji(i,m): \n', czas_produkcji)
-    print('czas_przezbrojenia(i,j): \n', czas_przezbrojenia)
-    print('koszt_przezbrojenia(i,j): \n', koszt_przezbrojenia)
-    print('dostepnosc_maszyn(m,t): \n', dostepnosc_maszyn)
-
     return WejscieMlclsp(zbior_wyrobow, zbior_okresow, zbior_maszyn, zbior_maszyn_z_przypisanymi_wyrobami, jkuz,
                          zapas_pocz, czas_realizacji, zapotrzebowanie, bom, czas_produkcji, czas_przezbrojenia,
                          koszt_przezbrojenia, dostepnosc_maszyn)
-
-
-# dziala na 3+ wyrobów
-def wygeneruj_bom_dla_sekwencji_jeden_z_dwoch(liczba_wyrobow):
-    bom = numpy.zeros((liczba_wyrobow, liczba_wyrobow), dtype=int)
-    # podzespoly_bazowe = numpy.zeros((random.randint(2, liczba_wyrobow // 2)), dtype=int)
-    # while True:
-    #     for p in range(0, len(podzespoly_bazowe)):
-    #         podzespoly_bazowe[p] = random.randint(0, liczba_wyrobow - 1)
-    #     if len(podzespoly_bazowe) == len(set(podzespoly_bazowe)):
-    #         break
-
-    for j in range(0, liczba_wyrobow):
-        # if j not in podzespoly_bazowe:
-        podzespol = 10000000
-        podzespol2 = 10000000
-        for i in range(0, 2):
-            while podzespol == podzespol2 or podzespol == j:
-                podzespol = random.randint(0, liczba_wyrobow - 1)
-            bom[j, podzespol] = 1
-            podzespol2 = podzespol
-
-    return numpy.transpose(bom)
 
 
 def wygeneruj_zapotrzebowanie(liczba_wyrobow, liczba_okresow):
@@ -138,6 +118,7 @@ def wygeneruj_koszty_przezbrajania(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z
 
     return koszt_przezbrojenia
 
+
 def wygeneruj_czas_produkcji(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_przypisanymi_wyrobami):
     czas_produkcji = numpy.zeros((liczba_wyrobow, liczba_maszyn))
     for m in range(0, liczba_maszyn):
@@ -145,6 +126,7 @@ def wygeneruj_czas_produkcji(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_przyp
             czas_produkcji[i, m] = round(random.uniform(0, 0.5), 2)
 
     return czas_produkcji
+
 
 def przypisz_wyroby_do_maszyn(liczba_wyrobow, liczba_maszyn):
     maszyny = list(range(0, liczba_maszyn))
@@ -159,6 +141,28 @@ def przypisz_wyroby_do_maszyn(liczba_wyrobow, liczba_maszyn):
             maszyny.remove(maszyna)
         else:
             wyroby_przypisane_do_maszyn[i] = random.randint(0, liczba_maszyn - 1)
+
+    wyroby_przypisane_do_maszyn = numpy.array(wyroby_przypisane_do_maszyn)
+    for i in range(0, liczba_maszyn):
+        przypisane_wyroby = numpy.where(wyroby_przypisane_do_maszyn == i)[0].tolist()
+        zbior_maszyn_z_przypisanymi_wyrobami.append(przypisane_wyroby)
+
+    return zbior_maszyn_z_przypisanymi_wyrobami
+
+
+def przypisz_wyroby_do_maszyn_zgodnie_z_warstwami_bom(liczba_wyrobow, bom):
+    liczba_maszyn = bom.poziomy.size
+    zbior_maszyn_z_przypisanymi_wyrobami = []
+    wyroby_przypisane_do_maszyn = [0] * liczba_wyrobow
+    wyrob = 0
+    numer_maszyny = 0
+
+    # każda maszyna posiada wyrób produkowany na niej
+    for maszyna in bom.poziomy:
+        for i in range(0, maszyna):
+            wyroby_przypisane_do_maszyn[wyrob] = numer_maszyny
+            wyrob += 1
+        numer_maszyny += 1
 
     wyroby_przypisane_do_maszyn = numpy.array(wyroby_przypisane_do_maszyn)
     for i in range(0, liczba_maszyn):
