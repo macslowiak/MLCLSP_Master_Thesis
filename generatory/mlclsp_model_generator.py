@@ -28,9 +28,8 @@ def mlclsp_model(wejscie_mlclsp_model):
         for i in wejscie_mlclsp_model.zbior_maszyn_z_przypisanymi_wyrobami[m]:
             s[i, m] = np.max(sij[i])
 
-    # -------- SPRAWDZENIE POPRAWNOŚCI DLA p,s -------- #
+    # -------- SPRAWDZENIE POPRAWNOŚCI DLA p -------- #
     __sprawdz_poprawnosc_dla_podstawowego_mlclsp(p)
-    __sprawdz_poprawnosc_dla_podstawowego_mlclsp(s)
 
     # -------- ZMIENNE DECYZYJNE -------- #
     model = gb.Model('MLCLSP')
@@ -40,13 +39,12 @@ def mlclsp_model(wejscie_mlclsp_model):
     I = {}
     for i in zbior_wyrobow:
         for t in zbior_okresow:
-            x[i, t] = model.addVar(vtype=gb.GRB.CONTINUOUS, lb=0, name='x(' + str(i) + ',' + str(t) + ')')
+            x[i, t] = model.addVar(vtype=gb.GRB.INTEGER, lb=0, name='x(' + str(i) + ',' + str(t) + ')')
             y[i, t] = model.addVar(vtype=gb.GRB.BINARY, name='y(' + str(i) + ',' + str(t) + ')')
 
-    print('Nazwa zmiennej:', 'x(' + str(1) + ',' + str(3) + ')')
     for i in zbior_wyrobow:
         for t in zbior_okresow_wraz_z_poczatkowym:
-            I[i, t] = model.addVar(vtype=gb.GRB.CONTINUOUS, lb=0, name='I(' + str(i) + ',' + str(t) + ')')
+            I[i, t] = model.addVar(vtype=gb.GRB.INTEGER, lb=0, name='I(' + str(i) + ',' + str(t) + ')')
 
     # -------- FUNKCJA CELU -------- #
     model.setObjective(gb.quicksum(h[i] * I[i, t] + c[i] * y[i, t] for i in zbior_wyrobow for t in zbior_okresow))
@@ -124,18 +122,18 @@ def mlclsp_partie_model(wejscie_mlclsp_model):
         for j in zbior_wyrobow:
             for t in zbior_okresow:
                 W[i, j, t] = model.addVar(vtype=gb.GRB.BINARY, name='W(' + str(i) + ',' + str(j) + ',' + str(t) + ')')
-                x_ijt[i, j, t] = model.addVar(vtype=gb.GRB.CONTINUOUS, lb=0,
+                x_ijt[i, j, t] = model.addVar(vtype=gb.GRB.INTEGER, lb=0,
                                               name='x_ijt(' + str(i) + ',' + str(j) + ',' + str(t) + ')')
                 for m in zbior_maszyn:
                     T[i, j, t, m] = model.addVar(vtype=gb.GRB.BINARY,
                                                  name='T(' + str(i) + ',' + str(j) + ',' + str(t) + ',' + str(m) + ')')
         for t in zbior_okresow:
-            x[i, t] = model.addVar(vtype=gb.GRB.CONTINUOUS, lb=0, name='x(' + str(i) + ',' + str(t) + ')')
+            x[i, t] = model.addVar(vtype=gb.GRB.INTEGER, lb=0, name='x(' + str(i) + ',' + str(t) + ')')
             u[i, t] = model.addVar(vtype=gb.GRB.CONTINUOUS, lb=0, name='u(' + str(i) + ',' + str(t) + ')')
 
     for i in zbior_wyrobow:
         for t in zbior_okresow_wraz_z_poczatkowym:
-            I[i, t] = model.addVar(vtype=gb.GRB.CONTINUOUS, lb=0, name='I(' + str(i) + ',' + str(t) + ')')
+            I[i, t] = model.addVar(vtype=gb.GRB.INTEGER, lb=0, name='I(' + str(i) + ',' + str(t) + ')')
         for t in zbior_okresow_dla_przezbrojen_poczatkowych:
             for m in zbior_maszyn:
                 alfa[i, t, m] = model.addVar(vtype=gb.GRB.BINARY,
@@ -312,12 +310,12 @@ def mlclsp_strumien_model(wejscie_mlclsp_model):
                     T[i, j, t, m] = model.addVar(vtype=gb.GRB.BINARY,
                                                  name='T(' + str(i) + ',' + str(j) + ',' + str(t) + ',' + str(m) + ')')
         for t in zbior_okresow:
-            x[i, t] = model.addVar(vtype=gb.GRB.CONTINUOUS, lb=0, name='x(' + str(i) + ',' + str(t) + ')')
+            x[i, t] = model.addVar(vtype=gb.GRB.INTEGER, lb=0, name='x(' + str(i) + ',' + str(t) + ')')
             u[i, t] = model.addVar(vtype=gb.GRB.CONTINUOUS, lb=0, name='u(' + str(i) + ',' + str(t) + ')')
 
     for i in zbior_wyrobow:
         for t in zbior_okresow_wraz_z_poczatkowym:
-            I[i, t] = model.addVar(vtype=gb.GRB.CONTINUOUS, lb=0, name='I(' + str(i) + ',' + str(t) + ')')
+            I[i, t] = model.addVar(vtype=gb.GRB.INTEGER, lb=0, name='I(' + str(i) + ',' + str(t) + ')')
         for t in zbior_okresow_dla_przezbrojen_poczatkowych:
             for m in zbior_maszyn:
                 alfa[i, t, m] = model.addVar(vtype=gb.GRB.BINARY,

@@ -49,7 +49,7 @@ def wygeneruj_dane(liczba_wyrobow, liczba_okresow, liczba_maszyn, bom):
     zapas_pocz = numpy.array([0] * liczba_wyrobow)
     czas_realizacji = numpy.array([0] * liczba_wyrobow)
 
-    zapotrzebowanie = wygeneruj_zapotrzebowanie(liczba_wyrobow, liczba_okresow)
+    zapotrzebowanie = wygeneruj_zapotrzebowanie(liczba_wyrobow, liczba_okresow, [0, 1, 2, 3], [0.5, 0.2, 0.2, 0.1])
     bom = bom.macierz
 
     zbior_maszyn_z_przypisanymi_wyrobami = przypisz_wyroby_do_maszyn(liczba_wyrobow, liczba_maszyn)
@@ -68,10 +68,8 @@ def wygeneruj_dane(liczba_wyrobow, liczba_okresow, liczba_maszyn, bom):
                          koszt_przezbrojenia, dostepnosc_maszyn)
 
 
-def wygeneruj_zapotrzebowanie(liczba_wyrobow, liczba_okresow):
+def wygeneruj_zapotrzebowanie(liczba_wyrobow, liczba_okresow, populacja, dystrybuanta):
     zapotrzebowanie = numpy.zeros((liczba_wyrobow, liczba_okresow + 1), dtype=int)
-    populacja = [0, 1, 2, 3, 4, 5]
-    dystrybuanta = [0.5, 0.1, 0.1, 0.1, 0.1, 0.1]
     for i in range(0, liczba_wyrobow):
         zapotrzebowanie[i, 0] = i
     for i in range(0, liczba_wyrobow):
@@ -97,7 +95,7 @@ def wygeneruj_czasy_przezbrajania(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_
     czas_przezbrojenia = numpy.zeros((liczba_wyrobow, liczba_wyrobow))
     for m in range(0, liczba_maszyn):
         if len(zbior_maszyn_z_przypisanymi_wyrobami[m]) > 1:
-            wygenerowany_czas = round(random.uniform(0, 0.5), 2)
+            wygenerowany_czas = round(random.uniform(0.01, 0.5), 2)
             for i in zbior_maszyn_z_przypisanymi_wyrobami[m]:
                 for j in zbior_maszyn_z_przypisanymi_wyrobami[m]:
                     if i != j:
@@ -123,7 +121,7 @@ def wygeneruj_czas_produkcji(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_przyp
     czas_produkcji = numpy.zeros((liczba_wyrobow, liczba_maszyn))
     for m in range(0, liczba_maszyn):
         for i in zbior_maszyn_z_przypisanymi_wyrobami[m]:
-            czas_produkcji[i, m] = round(random.uniform(0, 0.5), 2)
+            czas_produkcji[i, m] = round(random.uniform(0.01, 0.5), 2)
 
     return czas_produkcji
 
@@ -170,3 +168,8 @@ def przypisz_wyroby_do_maszyn_zgodnie_z_warstwami_bom(liczba_wyrobow, bom):
         zbior_maszyn_z_przypisanymi_wyrobami.append(przypisane_wyroby)
 
     return zbior_maszyn_z_przypisanymi_wyrobami
+
+
+def __stworz_sciezke_zapisu(nazwa_pliku):
+    sciezka_zapisu = str(Path(__file__).parent.parent) + '\\wyniki\\' + nazwa_pliku
+    return sciezka_zapisu

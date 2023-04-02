@@ -25,8 +25,7 @@ def narysuj_bom(bom):
     plt.rcParams["figure.autolayout"] = True
 
     stworzone_poziomy = __multilayered_graph(*bom.poziomy)
-    odwrocony_diagram = nx.from_numpy_matrix(bom.macierz, create_using=nx.DiGraph)
-    diagram = nx.DiGraph.reverse(odwrocony_diagram)
+    diagram = nx.from_numpy_matrix(bom.macierz, create_using=nx.DiGraph)
     pozycja = nx.multipartite_layout(stworzone_poziomy, subset_key="layer")
 
     nx.draw(diagram, pozycja, node_size=650, node_color='#E6E6FA', with_labels=True)
@@ -43,11 +42,12 @@ class Bom:
 
 def wygeneruj_bom(liczba_wyrobow, maksymalna_ilosc_wyrobow_w_warstwie,
                   minimalna_ilosc_wyrobow_w_warstwie, prawdopodobienstwo_stworzenia_polaczenia):
+    iteracja = 0
+
     while True:
         bom = np.zeros((liczba_wyrobow, liczba_wyrobow), dtype=int)
         poziomy = []
         produkty = 0
-        iteracja = 0
 
         while produkty < liczba_wyrobow:
 
@@ -71,20 +71,22 @@ def wygeneruj_bom(liczba_wyrobow, maksymalna_ilosc_wyrobow_w_warstwie,
             break
         iteracja += 1
         __przerwij_generowanie_jezeli_ilosc_iteracji_przekroczona(iteracja)
+
+    bom = np.transpose(bom)
     return Bom(bom, poziomy)
 
 
 # Należy odpowiednio dobrać prawdopodobieństwo do liczby polaczen wychodzacych
-def wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej(liczba_wyrobow, maksymalna_ilosc_wyrobow_w_warstwie,
-                                                          minimalna_ilosc_wyrobow_w_warstwie,
-                                                          prawdopodobienstwo_stworzenia_polaczenia,
-                                                          liczba_polaczen_wychodzacych):
+def wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej_jeden(liczba_wyrobow, maksymalna_ilosc_wyrobow_w_warstwie,
+                                                                minimalna_ilosc_wyrobow_w_warstwie,
+                                                                prawdopodobienstwo_stworzenia_polaczenia):
+    iteracja = 0
+    liczba_polaczen_wychodzacych = 1
     while True:
         bom = np.zeros((liczba_wyrobow, liczba_wyrobow), dtype=int)
         produkty_z_polaczeniami_wychodzacymi = np.zeros(liczba_wyrobow, dtype=int)
         poziomy = []
         produkty = 0
-        iteracja = 0
 
         while produkty < liczba_wyrobow:
 
@@ -93,8 +95,10 @@ def wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej(liczba_wyrobow, maksym
                 if nowe_produkty + produkty <= liczba_wyrobow:
                     break
                 if liczba_wyrobow - produkty < minimalna_ilosc_wyrobow_w_warstwie:
-                    return wygeneruj_bom(liczba_wyrobow, maksymalna_ilosc_wyrobow_w_warstwie,
-                                         minimalna_ilosc_wyrobow_w_warstwie, prawdopodobienstwo_stworzenia_polaczenia)
+                    return wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej_jeden(liczba_wyrobow,
+                                                                                 maksymalna_ilosc_wyrobow_w_warstwie,
+                                                                                 minimalna_ilosc_wyrobow_w_warstwie,
+                                                                                 prawdopodobienstwo_stworzenia_polaczenia)
 
             for produkt_poprzednia_warstwa in range(produkty):
                 for produkt_nowa_warstwa in range(nowe_produkty):
@@ -114,6 +118,8 @@ def wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej(liczba_wyrobow, maksym
             break
         iteracja += 1
         __przerwij_generowanie_jezeli_ilosc_iteracji_przekroczona(iteracja)
+
+    bom = np.transpose(bom)
     return Bom(bom, poziomy)
 
 
@@ -124,7 +130,6 @@ def __czy_produkt_bez_polaczen(bom_macierz):
         if kolumny_suma[produkt] == 0 and wiersze_suma[produkt] == 0:
             return True
     return False
-
 
 def __suma_kolumny(bom_macierz):
     return np.sum(bom_macierz, axis=0)
