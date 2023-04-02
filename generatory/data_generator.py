@@ -49,7 +49,7 @@ def wygeneruj_dane(liczba_wyrobow, liczba_okresow, liczba_maszyn, bom):
     zapas_pocz = numpy.array([0] * liczba_wyrobow)
     czas_realizacji = numpy.array([0] * liczba_wyrobow)
 
-    zapotrzebowanie = wygeneruj_zapotrzebowanie(liczba_wyrobow, liczba_okresow, [0, 1, 2, 3], [0.5, 0.2, 0.2, 0.1])
+    zapotrzebowanie = wygeneruj_zapotrzebowanie(liczba_wyrobow, liczba_okresow, [0, 1, 2, 3], [0.7, 0.15, 0.1, 0.05])
     bom = bom.macierz
 
     zbior_maszyn_z_przypisanymi_wyrobami = przypisz_wyroby_do_maszyn(liczba_wyrobow, liczba_maszyn)
@@ -59,9 +59,9 @@ def wygeneruj_dane(liczba_wyrobow, liczba_okresow, liczba_maszyn, bom):
     czas_przezbrojenia = wygeneruj_czasy_przezbrajania(liczba_wyrobow, liczba_maszyn,
                                                        zbior_maszyn_z_przypisanymi_wyrobami)
     koszt_przezbrojenia = wygeneruj_koszty_przezbrajania(liczba_wyrobow, liczba_maszyn,
-                                                         zbior_maszyn_z_przypisanymi_wyrobami)
+                                                         zbior_maszyn_z_przypisanymi_wyrobami, 3)
 
-    dostepnosc_maszyn = wygeneruj_dostepnosc_maszyn(liczba_wyrobow, liczba_okresow)
+    dostepnosc_maszyn = wygeneruj_dostepnosc_maszyn(liczba_maszyn, liczba_okresow)
 
     return WejscieMlclsp(zbior_wyrobow, zbior_okresow, zbior_maszyn, zbior_maszyn_z_przypisanymi_wyrobami, jkuz,
                          zapas_pocz, czas_realizacji, zapotrzebowanie, bom, czas_produkcji, czas_przezbrojenia,
@@ -79,12 +79,12 @@ def wygeneruj_zapotrzebowanie(liczba_wyrobow, liczba_okresow, populacja, dystryb
     return zapotrzebowanie
 
 
-def wygeneruj_dostepnosc_maszyn(liczba_wyrobow, liczba_okresow):
-    dostepnosc_maszyn = numpy.zeros((liczba_wyrobow, liczba_okresow + 1), dtype=int)
+def wygeneruj_dostepnosc_maszyn(liczba_maszyn, liczba_okresow):
+    dostepnosc_maszyn = numpy.zeros((liczba_maszyn, liczba_okresow + 1), dtype=int)
 
-    for i in range(0, liczba_wyrobow):
+    for i in range(0, liczba_maszyn):
         dostepnosc_maszyn[i, 0] = i
-    for i in range(0, liczba_wyrobow):
+    for i in range(0, liczba_maszyn):
         for m in range(1, liczba_okresow + 1):
             dostepnosc_maszyn[i, m] = 1
 
@@ -103,12 +103,22 @@ def wygeneruj_czasy_przezbrajania(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_
 
     return czas_przezbrojenia
 
+def wygeneruj_czasy_przezbrajania_dla_czasu(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_przypisanymi_wyrobami, czas):
+    czas_przezbrojenia = numpy.zeros((liczba_wyrobow, liczba_wyrobow))
+    for m in range(0, liczba_maszyn):
+        if len(zbior_maszyn_z_przypisanymi_wyrobami[m]) > 1:
+            for i in zbior_maszyn_z_przypisanymi_wyrobami[m]:
+                for j in zbior_maszyn_z_przypisanymi_wyrobami[m]:
+                    if i != j:
+                        czas_przezbrojenia[i, j] = czas
 
-def wygeneruj_koszty_przezbrajania(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_przypisanymi_wyrobami):
+    return czas_przezbrojenia
+
+
+def wygeneruj_koszty_przezbrajania(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_przypisanymi_wyrobami, koszt):
     koszt_przezbrojenia = numpy.zeros((liczba_wyrobow, liczba_wyrobow), dtype=int)
     for m in range(0, liczba_maszyn):
         if len(zbior_maszyn_z_przypisanymi_wyrobami[m]) > 1:
-            koszt = 3
             for i in zbior_maszyn_z_przypisanymi_wyrobami[m]:
                 for j in zbior_maszyn_z_przypisanymi_wyrobami[m]:
                     if i != j:
@@ -122,6 +132,14 @@ def wygeneruj_czas_produkcji(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_przyp
     for m in range(0, liczba_maszyn):
         for i in zbior_maszyn_z_przypisanymi_wyrobami[m]:
             czas_produkcji[i, m] = round(random.uniform(0.01, 0.5), 2)
+
+    return czas_produkcji
+
+def wygeneruj_czas_produkcji_dla_czasu(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_przypisanymi_wyrobami, czas):
+    czas_produkcji = numpy.zeros((liczba_wyrobow, liczba_maszyn))
+    for m in range(0, liczba_maszyn):
+        for i in zbior_maszyn_z_przypisanymi_wyrobami[m]:
+            czas_produkcji[i, m] = czas
 
     return czas_produkcji
 
