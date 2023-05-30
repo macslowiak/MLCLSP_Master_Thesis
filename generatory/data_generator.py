@@ -39,8 +39,8 @@ class WejscieMlclsp:
 
 
 def wygeneruj_dane(liczba_wyrobow, liczba_okresow, liczba_maszyn, bom):
-    if liczba_wyrobow not in [5, 10, 15, 20, 25, 30]:
-        raise Exception("Liczba wyrobów musi być równa jedenej z podanych liczb: [5,10,15,20,25,30]")
+    if liczba_wyrobow not in [5, 10, 15, 20, 25]:
+        raise Exception("Liczba wyrobów musi być równa jedenej z podanych liczb: [5,10,15,20,25]")
     zbior_wyrobow = numpy.array(list(range(0, liczba_wyrobow)))
     zbior_okresow = numpy.array(list(range(1, liczba_okresow + 1)))
     zbior_maszyn = numpy.array(list(range(0, liczba_maszyn)))
@@ -49,15 +49,17 @@ def wygeneruj_dane(liczba_wyrobow, liczba_okresow, liczba_maszyn, bom):
     zapas_pocz = numpy.array([0] * liczba_wyrobow)
     czas_realizacji = numpy.array([0] * liczba_wyrobow)
 
-    zapotrzebowanie = wygeneruj_zapotrzebowanie(liczba_wyrobow, liczba_okresow, [0, 1, 2, 3], [0.7, 0.15, 0.1, 0.05])
+    zapotrzebowanie = wygeneruj_zapotrzebowanie(liczba_wyrobow, liczba_okresow, [0, 1], [0.8, 0.2])
     bom = bom.macierz
 
-    zbior_maszyn_z_przypisanymi_wyrobami = przypisz_wyroby_do_maszyn(liczba_wyrobow, liczba_maszyn)
+    zbior_maszyn_z_przypisanymi_wyrobami = przypisz_wyroby_do_maszyn_uwzgledniajac_zapotrzebowanie(
+        liczba_wyrobow, liczba_maszyn, bom, zapotrzebowanie)
 
-    czas_produkcji = wygeneruj_czas_produkcji(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_przypisanymi_wyrobami)
+    czas_produkcji = wygeneruj_czas_produkcji_dla_czasu(liczba_wyrobow, liczba_maszyn,
+                                                        zbior_maszyn_z_przypisanymi_wyrobami, 0.1)
 
-    czas_przezbrojenia = wygeneruj_czasy_przezbrajania(liczba_wyrobow, liczba_maszyn,
-                                                       zbior_maszyn_z_przypisanymi_wyrobami)
+    czas_przezbrojenia = wygeneruj_czasy_przezbrajania_dla_czasu(liczba_wyrobow, liczba_maszyn,
+                                                                 zbior_maszyn_z_przypisanymi_wyrobami, 0.2)
     koszt_przezbrojenia = wygeneruj_koszty_przezbrajania(liczba_wyrobow, liczba_maszyn,
                                                          zbior_maszyn_z_przypisanymi_wyrobami, 3)
 
@@ -75,6 +77,20 @@ def wygeneruj_zapotrzebowanie(liczba_wyrobow, liczba_okresow, populacja, dystryb
     for i in range(0, liczba_wyrobow):
         for m in range(1, liczba_okresow + 1):
             zapotrzebowanie[i, m] = numpy.random.choice(populacja, p=dystrybuanta)
+
+    return zapotrzebowanie
+
+
+def wygeneruj_zapotrzebowanie_dla_produkcji_seryjnej(liczba_wyrobow, liczba_okresow,
+                                                     liczba_wyrobow_koncowych):
+    zapotrzebowanie = numpy.zeros((liczba_wyrobow, liczba_okresow + 1), dtype=int)
+    for i in range(0, liczba_wyrobow):
+        zapotrzebowanie[i, 0] = i
+    for i in range(0, liczba_wyrobow):
+        for m in range(1, liczba_okresow + 1):
+            zapotrzebowanie[i, m] = 0
+    for m in range(1, liczba_okresow + 1):
+        zapotrzebowanie[liczba_wyrobow - 1, m] = liczba_wyrobow_koncowych
 
     return zapotrzebowanie
 
@@ -102,6 +118,7 @@ def wygeneruj_czasy_przezbrajania(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_
                         czas_przezbrojenia[i, j] = wygenerowany_czas
 
     return czas_przezbrojenia
+
 
 def wygeneruj_czasy_przezbrajania_dla_czasu(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_przypisanymi_wyrobami, czas):
     czas_przezbrojenia = numpy.zeros((liczba_wyrobow, liczba_wyrobow))
@@ -135,6 +152,7 @@ def wygeneruj_czas_produkcji(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_przyp
 
     return czas_produkcji
 
+
 def wygeneruj_czas_produkcji_dla_czasu(liczba_wyrobow, liczba_maszyn, zbior_maszyn_z_przypisanymi_wyrobami, czas):
     czas_produkcji = numpy.zeros((liczba_wyrobow, liczba_maszyn))
     for m in range(0, liczba_maszyn):
@@ -144,19 +162,35 @@ def wygeneruj_czas_produkcji_dla_czasu(liczba_wyrobow, liczba_maszyn, zbior_masz
     return czas_produkcji
 
 
-def przypisz_wyroby_do_maszyn(liczba_wyrobow, liczba_maszyn):
+def przypisz_wyroby_do_maszyn_uwzgledniajac_zapotrzebowanie(liczba_wyrobow, liczba_maszyn, bom, zapotrzebowanie):
     maszyny = list(range(0, liczba_maszyn))
     zbior_maszyn_z_przypisanymi_wyrobami = []
     wyroby_przypisane_do_maszyn = [0] * liczba_wyrobow
+
+    obciazenie_maszyn = numpy.zeros(liczba_maszyn, dtype=int)
+    zapotrzebowanie = numpy.delete(zapotrzebowanie, 0, 1)
+    zapotrzebowanie_na_wyrob_w_okresach = zapotrzebowanie.sum(axis=1)
+    zapotrzebowanie_bom = numpy.transpose(bom) * zapotrzebowanie_na_wyrob_w_okresach.reshape(
+        (zapotrzebowanie_na_wyrob_w_okresach.size, 1)
+    )
+    zapotrzebowanie_bom = numpy.transpose(zapotrzebowanie_bom)
+    zapotrzebowanie_na_wyrob_bom = numpy.sum(zapotrzebowanie_bom, axis=1)
+    zapotrzebowanie_na_wyrob = numpy.add(zapotrzebowanie_na_wyrob_bom, zapotrzebowanie_na_wyrob_w_okresach)
 
     # każda maszyna posiada wyrób produkowany na niej
     for i in range(0, liczba_wyrobow):
         if maszyny:
             maszyna = random.choice(maszyny)
             wyroby_przypisane_do_maszyn[i] = maszyna
+            obciazenie_maszyn[maszyna] = obciazenie_maszyn[maszyna] + zapotrzebowanie_na_wyrob[i]
             maszyny.remove(maszyna)
         else:
-            wyroby_przypisane_do_maszyn[i] = random.randint(0, liczba_maszyn - 1)
+            if wyroby_przypisane_do_maszyn[i] == 0:
+                wyroby_przypisane_do_maszyn[i] = random.randint(0, liczba_maszyn - 1)
+            else:
+                maszyna = numpy.argmin(obciazenie_maszyn)
+                wyroby_przypisane_do_maszyn[i] = maszyna
+                obciazenie_maszyn[maszyna] = obciazenie_maszyn[maszyna] + zapotrzebowanie_na_wyrob[i]
 
     wyroby_przypisane_do_maszyn = numpy.array(wyroby_przypisane_do_maszyn)
     for i in range(0, liczba_maszyn):

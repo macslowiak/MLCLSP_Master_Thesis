@@ -96,9 +96,9 @@ def wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej_jeden(liczba_wyrobow, 
                     break
                 if liczba_wyrobow - produkty < minimalna_ilosc_wyrobow_w_warstwie:
                     return wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej_jeden(liczba_wyrobow,
-                                                                                 maksymalna_ilosc_wyrobow_w_warstwie,
-                                                                                 minimalna_ilosc_wyrobow_w_warstwie,
-                                                                                 prawdopodobienstwo_stworzenia_polaczenia)
+                                                                                       maksymalna_ilosc_wyrobow_w_warstwie,
+                                                                                       minimalna_ilosc_wyrobow_w_warstwie,
+                                                                                       prawdopodobienstwo_stworzenia_polaczenia)
 
             for produkt_poprzednia_warstwa in range(produkty):
                 for produkt_nowa_warstwa in range(nowe_produkty):
@@ -123,6 +123,22 @@ def wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej_jeden(liczba_wyrobow, 
     return Bom(bom, poziomy)
 
 
+def wygeneruj_bom_dla_produkcji_seryjnej(liczba_wyrobow):
+    bom = np.zeros((liczba_wyrobow, liczba_wyrobow), dtype=int)
+    poziomy = []
+    produkt_poprzednia_warstwa = 0
+
+    while produkt_poprzednia_warstwa < liczba_wyrobow - 1:
+        nowy_produkt = 1
+        bom[nowy_produkt + produkt_poprzednia_warstwa, produkt_poprzednia_warstwa] = 1
+
+        poziomy.append(nowy_produkt)
+        produkt_poprzednia_warstwa += nowy_produkt
+    poziomy.append(1)
+    bom = np.transpose(bom)
+    return Bom(bom, poziomy)
+
+
 def __czy_produkt_bez_polaczen(bom_macierz):
     kolumny_suma = __suma_kolumny(bom_macierz)
     wiersze_suma = __suma_wiersze(bom_macierz)
@@ -130,6 +146,7 @@ def __czy_produkt_bez_polaczen(bom_macierz):
         if kolumny_suma[produkt] == 0 and wiersze_suma[produkt] == 0:
             return True
     return False
+
 
 def __suma_kolumny(bom_macierz):
     return np.sum(bom_macierz, axis=0)

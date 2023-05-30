@@ -10,7 +10,10 @@ def __wygeneruj_folder(sciezka_folderu):
 
 sciezki_folderow = [
     'bom_jedno_wyjscie',
-    'bom_wiele_wyjsc'
+    'bom_wiele_wyjsc',
+    'zmiana_liczby_maszyn',
+    'bom_produkcja_seryjna'
+    'bom_produkcja_seryjna_ciezki_przypadek'
 ]
 
 for sciezka_folderu in sciezki_folderow:

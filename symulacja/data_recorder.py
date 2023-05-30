@@ -1,5 +1,6 @@
 import csv
 import pickle
+import matplotlib.pyplot as plt
 
 from generatory import bom_generator
 
@@ -8,27 +9,28 @@ def __zamien_kropke_na_przecinek(x):
     return (str(x).replace('.', ','))
 
 
-def zapisz_model(model, liczba_wyrobow, sciezka_zapisu):
+def zapisz_model(model, liczba_wyrobow, sciezka_zapisu, numer_modelu):
     nazwa_modelu = model.ModelName
-    model.write(sciezka_zapisu + '\\modele\\' + nazwa_modelu + '_' + str(liczba_wyrobow) + '.lp')
+    model.write(sciezka_zapisu + '\\modele\\' + nazwa_modelu + '_' + str(liczba_wyrobow) + '_' + str(numer_modelu) + '.lp')
 
 
-def zapisz_graf_bom(bom, sciezka_zapisu, liczba_wyrobow):
+def zapisz_graf_bom(bom, sciezka_zapisu, liczba_wyrobow, numer_modelu):
     graf = bom_generator.narysuj_bom(bom)
-    graf.savefig(sciezka_zapisu + '\\dane_wejsciowe\\' + str(liczba_wyrobow))
+    graf.savefig(sciezka_zapisu + '\\dane_wejsciowe\\' + str(liczba_wyrobow) + '_' + str(numer_modelu))
+    plt.close(graf)
 
 
-def zapisz_dane_wejsciowe(dane_wejsciowe, sciezka_zapisu, liczba_wyrobow):
-    plik_z_danymi_wejsciowymi = sciezka_zapisu + '\\dane_wejsciowe\\' + str(liczba_wyrobow)
+def zapisz_dane_wejsciowe(dane_wejsciowe, sciezka_zapisu, liczba_wyrobow, numer_modelu):
+    plik_z_danymi_wejsciowymi = sciezka_zapisu + '\\dane_wejsciowe\\' + str(liczba_wyrobow) + '_' + str(numer_modelu)
     with open(plik_z_danymi_wejsciowymi + '.pickle', 'wb') as plik:
         pickle.dump(dane_wejsciowe, plik, protocol=pickle.HIGHEST_PROTOCOL)
     with open(plik_z_danymi_wejsciowymi + '.txt', 'a') as plik:
         plik.write(dane_wejsciowe.__str__())
 
 
-def zapisz_rozwiazanie(model, dane_wejsciowe, sciezka_zapisu, nazwa_pliku_z_rozwiazaniem):
+def zapisz_rozwiazanie(model, dane_wejsciowe, sciezka_zapisu, nazwa_pliku_z_rozwiazaniem, numer_modelu):
     nazwa_modelu = model.ModelName
-    liczba_wyrobow = str(dane_wejsciowe.zbior_wyrobow.size)
+    liczba_wyrobow = str(dane_wejsciowe.zbior_wyrobow.size) + '_' + str(numer_modelu)
 
     plik_z_rozwiazaniem = sciezka_zapisu + '\\' + nazwa_pliku_z_rozwiazaniem + '.csv'
 
