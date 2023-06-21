@@ -50,7 +50,7 @@ def czy_model_wykonalny(dane_wejsciowe, liczba_wyrobow, bom,
 
 # DANE WEJSCIOWE
 
-nazwa_pliku_z_rozwiazaniem = 'bom_wiele_wyjsc'
+nazwa_pliku_z_rozwiazaniem = 'struktura_ogolna'
 sciezka_zapisu = data_generator.__stworz_sciezke_zapisu(nazwa_pliku_z_rozwiazaniem)
 zbior_liczba_wyrobow = [5, 10, 15, 20, 25]
 maksymalna_ilosc_wyrobow_w_warstwie = 5
@@ -63,7 +63,7 @@ powiekszanie_liczby_maszyn = 0
 
 # DANE WEJSCIOWE
 
-print('Rozpoczynam symulacje dla wyrobów z BOM dla wielu wyjść dla każdego produktu...')
+print('Rozpoczynam symulacje dla wyrobów z BOM dla struktury ogólnej...')
 for liczba_wyrobow in zbior_liczba_wyrobow:
     for numer_modelu in range(0, liczba_modeli):
         wykonalny = False

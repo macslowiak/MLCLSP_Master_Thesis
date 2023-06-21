@@ -77,7 +77,7 @@ def wygeneruj_bom(liczba_wyrobow, maksymalna_ilosc_wyrobow_w_warstwie,
 
 
 # Należy odpowiednio dobrać prawdopodobieństwo do liczby polaczen wychodzacych
-def wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej_jeden(liczba_wyrobow, maksymalna_ilosc_wyrobow_w_warstwie,
+def wygeneruj_bom_dla_struktury_wyrobow_z_montazem(liczba_wyrobow, maksymalna_ilosc_wyrobow_w_warstwie,
                                                                 minimalna_ilosc_wyrobow_w_warstwie,
                                                                 prawdopodobienstwo_stworzenia_polaczenia):
     iteracja = 0
@@ -95,7 +95,7 @@ def wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej_jeden(liczba_wyrobow, 
                 if nowe_produkty + produkty <= liczba_wyrobow:
                     break
                 if liczba_wyrobow - produkty < minimalna_ilosc_wyrobow_w_warstwie:
-                    return wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej_jeden(liczba_wyrobow,
+                    return wygeneruj_bom_dla_struktury_wyrobow_z_montazem(liczba_wyrobow,
                                                                                        maksymalna_ilosc_wyrobow_w_warstwie,
                                                                                        minimalna_ilosc_wyrobow_w_warstwie,
                                                                                        prawdopodobienstwo_stworzenia_polaczenia)
@@ -123,7 +123,7 @@ def wygeneruj_bom_dla_liczby_polaczen_wychodzacych_rownej_jeden(liczba_wyrobow, 
     return Bom(bom, poziomy)
 
 
-def wygeneruj_bom_dla_produkcji_seryjnej(liczba_wyrobow):
+def wygeneruj_bom_dla_struktury_seryjnej(liczba_wyrobow):
     bom = np.zeros((liczba_wyrobow, liczba_wyrobow), dtype=int)
     poziomy = []
     produkt_poprzednia_warstwa = 0

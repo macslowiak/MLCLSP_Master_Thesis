@@ -78,7 +78,7 @@ def zapisz_wynik(dane_wejsciowe, liczba_wyrobow, bom, sciezka_zapisu, numer_mode
 
 # DANE WEJSCIOWE
 
-nazwa_pliku_z_rozwiazaniem = 'bom_produkcja_seryjna'
+nazwa_pliku_z_rozwiazaniem = 'bom_struktura_seryjna_ciezki_przypadek'
 sciezka_zapisu = data_generator.__stworz_sciezke_zapisu(nazwa_pliku_z_rozwiazaniem)
 zbior_liczba_wyrobow = [5, 10, 15, 20, 25]
 liczba_okresow = 10
@@ -90,10 +90,10 @@ ilosc_okresow_poczatkowych = 1
 
 # DANE WEJSCIOWE
 
-print('Rozpoczynam symulacje dla wyrobów z BOM dla produkcji seryjnej...')
+print('Rozpoczynam symulacje dla wyrobów z BOM dla struktury seryjnej...')
 for liczba_wyrobow in zbior_liczba_wyrobow:
     for numer_modelu in range(0, liczba_modeli):
-        bom = bom_generator.wygeneruj_bom_dla_produkcji_seryjnej(liczba_wyrobow)
+        bom = bom_generator.wygeneruj_bom_dla_struktury_seryjnej(liczba_wyrobow)
         dane_wejsciowe = modyfikuj_dane_wejsciowe(bom, liczba_wyrobow, liczba_okresow, liczba_maszyn,
                                                   liczba_wyrobow_koncowych, ilosc_okresow_poczatkowych)
         rozwiaz_mlclsp(dane_wejsciowe, liczba_wyrobow, sciezka_zapisu, numer_modelu,

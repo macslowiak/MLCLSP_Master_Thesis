@@ -50,7 +50,7 @@ def czy_model_wykonalny(dane_wejsciowe, liczba_wyrobow, bom,
 
 # DANE WEJSCIOWE
 
-nazwa_pliku_z_rozwiazaniem = 'bom_produkcja_seryjna'
+nazwa_pliku_z_rozwiazaniem = 'bom_struktura_seryjna'
 sciezka_zapisu = data_generator.__stworz_sciezke_zapisu(nazwa_pliku_z_rozwiazaniem)
 zbior_liczba_wyrobow = [5, 10, 15, 20, 25]
 liczba_okresow = 3
@@ -60,14 +60,14 @@ powiekszanie_liczby_maszyn = 3
 
 # DANE WEJSCIOWE
 
-print('Rozpoczynam symulacje dla wyrobów z BOM dla produkcji seryjnej...')
+print('Rozpoczynam symulacje dla wyrobów z BOM dla struktury seryjnej...')
 for liczba_wyrobow in zbior_liczba_wyrobow:
     for numer_modelu in range(0, liczba_modeli):
         wykonalny = False
         while not wykonalny:
             gc.collect()
 
-            bom = bom_generator.wygeneruj_bom_dla_produkcji_seryjnej(liczba_wyrobow)
+            bom = bom_generator.wygeneruj_bom_dla_struktury_seryjnej(liczba_wyrobow)
 
             dane_wejsciowe = modyfikuj_dane_wejsciowe(bom, liczba_wyrobow, liczba_okresow, liczba_maszyn)
             rozwiazane_modele = symulacja(dane_wejsciowe)
